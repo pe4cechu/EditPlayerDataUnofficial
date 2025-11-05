@@ -17,7 +17,7 @@ To edit data, go to settings from the main screen and click on the "Player Data"
 <ol>
 <li>Install <a href="https://melonwiki.xyz/#/?id=automated-installation">MelonLoader</a></li>
 <li>Download <a href="https://github.com/gurrenm3/BTD-Mod-Helper/releases/latest">Btd6ModHelper.dll</a></li>
-<li>Download <a href="https://github.com/MaliciousFiles/EditPlayerData/releases/latest">EditPlayerData.dll</a></li>
+<li>Download <a href="https://github.com/pe4cechu/EditPlayerDataUnofficial/releases/latest">EditPlayerData.dll</a></li>
 <li>Put both DLL files in the mods directory, probably found at `C:\Program Files (x86)\Steam\steamapps\common\BloonsTD6\Mods` but can also be found by right clicking on the game in steam and selecting "Browse Local Files".</li>
 <li>Launch the game</li>
 <li>Go to Settings (the gear icon in the top left)</li>
