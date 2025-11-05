@@ -7,11 +7,6 @@
 
 EditPlayerData
 
-[![total downloads](https://img.shields.io/github/downloads/gurrenm3/BTD-Mod-Helper/total 'total downloads for API')](https://github.com/gurrenm3/BTD-Mod-Helper/releases)
-[![total issues](https://img.shields.io/github/issues/gurrenm3/BTD-Mod-Helper 'total issues for API')](https://github.com/gurrenm3/BTD-Mod-Helper/issues)
-[![code size](https://img.shields.io/github/stars/gurrenm3/BTD-Mod-Helper 'total stars for API')](https://github.com/gurrenm3/BTD-Mod-Helper/stargazers)
-[![latest release](https://img.shields.io/github/v/tag/gurrenm3/BTD-Mod-Helper 'latest release for API')](https://github.com/gurrenm3/BTD-Mod-Helper/releases/latest)
-
 </h1>
 
 A BTD6 mod that allows you to edit various player data, including but not limited to **unlocking double cash**, **unlocking all maps**, and editing **monkey money**, **monkey knowledge**, and **trophies**.
