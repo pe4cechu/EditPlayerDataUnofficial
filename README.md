@@ -3,12 +3,6 @@
     <img align="right" alt="Download" height="75" src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">
 </a>
 
-<h1 align="center">
-<a href="https://github.com/doombubbles/template-mod/releases/latest/download/EditPlayerData.dll">
-    <img id="mod-icon" align="left" alt="Icon" height="90" src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Icon.png">
-    <img id="download-icon" align="right" alt="Download" height="75" src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">
-</a>
-
 EditPlayerData
 
 </h1>
