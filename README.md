@@ -1,10 +1,10 @@
 <h1 align="center">
-  <img align="center" alt="Mod Icon" height="90" src="Icon.png" style="vertical-align: middle; margin: 0 20px;">
+  <img align="center" alt="Mod Icon" height="90" src="Icon.png" style="vertical-align: middle; margin: 0 100px;">
   EditPlayerData
-  <a href="https://github.com/doombubbles/template-mod/releases/latest/download/EditPlayerData.dll">
+  <a href="https://github.com/pe4cechu/EditPlayerDataUnofficial/releases/latest/download/EditPlayerData.dll">
     <img align="center" alt="Download" height="75" 
          src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png" 
-         style="vertical-align: middle; margin: 0 20px;">
+         style="vertical-align: middle; margin: 0 100px;">
   </a>
 </h1>
 
