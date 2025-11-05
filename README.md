@@ -10,11 +10,10 @@ EditPlayerDataUnofficial
 A BTD6 mod that allows you to edit various player data, including but not limited to <strong>unlocking double cash</strong>, <strong>unlocking all maps</strong>, and editing <strong>monkey money</strong>, <strong>monkey knowledge</strong>, and <strong>trophies</strong>.
 </p>
 
-## Instructions
+<h1 align="center">Installation</h1>
 
 To edit data, go to settings from the main screen and click on the "Player Data" button on the second row!
 
-<h1 align="center">Installation</h1>
 <ol>
 <li>Install <a href="https://melonwiki.xyz/#/?id=automated-installation">MelonLoader</a></li>
 <li>Download <a href="https://github.com/gurrenm3/BTD-Mod-Helper/releases/latest">Btd6ModHelper.dll</a></li>
