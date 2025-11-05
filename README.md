@@ -3,12 +3,14 @@
     <img align="left" alt="Icon" height="90" src="Icon.png">
     <img align="right" alt="Download" height="75" src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">
 </a>
-Rogue Remix
+EditPlayerDataUnofficial
 </h1>
 
 <p align="center">
 A BTD6 mod that allows you to edit various player data, including but not limited to <strong>unlocking double cash</strong>, <strong>unlocking all maps</strong>, and editing <strong>monkey money</strong>, <strong>monkey knowledge</strong>, and <strong>trophies</strong>.
 </p>
+
+To edit data, go to settings from the main screen and click on the "Player Data" button on the second row!
 
 <h1 align="center">Installation</h1>
 <ol>
