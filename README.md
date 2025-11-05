@@ -1,10 +1,7 @@
-<a href="https://github.com/doombubbles/template-mod/releases/latest/download/EditPlayerData.dll" style="float:right; margin-left:10px;">
-  <img alt="Download" height="75" src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">
-</a>
-
+<a href="https://github.com/doombubbles/template-mod/releases/latest/download/EditPlayerData.dll">
 <img align="left" alt="Icon" height="90" src="Icon.png">
-
-<br clear="both">
+[<img align="right" alt="Download" height="75" src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">]
+</a>
 
 
 A BTD6 mod that allows you to edit various player data, including but not limited to **unlocking double cash**, **unlocking all maps**, and editing **monkey money**, **monkey knowledge**, and **trophies**.
