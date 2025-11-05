@@ -12,7 +12,7 @@ A BTD6 mod that allows you to edit various player data, including but not limite
 
 ## Main Changes
 - Unlocking hero skins: Adora She-Ra and Obyn Skeletor.
-- Fixing bugs of official version: [EditPlayerData](https://github.com/MaliciousFiles/EditPlayerData).
+- Fixing bugs of [EditPlayerData](https://github.com/MaliciousFiles/EditPlayerData) official version.
 
 
 ## Installation
