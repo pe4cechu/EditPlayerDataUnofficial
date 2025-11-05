@@ -1,8 +1,7 @@
-<a>
-<img align="left" alt="Mod Icon" height="90" src="Icon.png">
-
-[<img align="right" alt="Download Latest" height="75" 
-src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">](https://github.com/doombubbles/template-mod/releases/latest/download/EditPlayerData.dll)
+<a href="">
+    <img align="left"  alt="Icon"   height="90" src="Icon.png">
+    <img align="right" alt="Download" height="75"
+         src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">
 </a>
 
 <h1 align="center">EditPlayerDataUnofficial</h1>
