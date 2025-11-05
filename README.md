@@ -7,10 +7,8 @@ Rogue Remix
 </h1>
 
 <p align="center">
-A BTD6 mod that allows you to edit various player data, including but not limited to **unlocking double cash**, **unlocking all maps**, and editing **monkey money**, **monkey knowledge**, and **trophies**.
+A BTD6 mod that allows you to edit various player data, including but not limited to <strong>unlocking double cash</strong>, <strong>unlocking all maps</strong>, and editing <strong>monkey money</strong>, <strong>monkey knowledge</strong>, and <strong>trophies</strong>.
 </p>
-
-
 
 <h1 align="center">Installation</h1>
 <ol>
