@@ -71,6 +71,20 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
                         if (t) skins.Add("AdoraSheRa");
                         else skins.Remove("AdoraSheRa");
                     }),
+                new BoolPlayerDataSetting(
+                    "Unlocked Red Sauda",
+                    VanillaSprites.HeroIconSaudaRed2,
+                    false,
+                    () => GetPlayer().Data.unlockedTowerSkins != null &&
+                          GetPlayer().Data.unlockedTowerSkins.Contains("RedSauda"),
+                    t =>
+                    {
+                        var data = GetPlayer().Data;
+                        var skins = data.unlockedTowerSkins ??= new Il2CppSystem.Collections.Generic.HashSet<string>();
+                        if (t) skins.Add("RedSauda");
+                        else skins.Remove("RedSauda");
+                    }),
+
 
                 new PurchasePlayerDataSetting("Unlocked Double Cash", VanillaSprites.DoubleCashModeShop, "btd6_doublecashmode"),
                 new PurchasePlayerDataSetting("Unlocked Fast Track", VanillaSprites.FastTrackModeIcon,
