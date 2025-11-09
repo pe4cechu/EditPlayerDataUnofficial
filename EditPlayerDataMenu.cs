@@ -337,18 +337,18 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
             if (power.name is "CaveMonkey" or "DungeonStatue" or "SpookyCreature") continue;
 
             Settings["Powers"].Add(new NumberPlayerDataSetting(
-                LocalizationManager.Instance.Format(power.name),
+                LocalizationManager.Instance.Format(power.PowerId),
                 power.icon.GetGUID(), 0,
-                () => GetPlayer().GetPowerData(power.name)?.Quantity ?? 0,
+                () => GetPlayer().GetPowerData(power.PowerId)?.Quantity ?? 0,
                 t =>
                 {
                     if (GetPlayer().IsPowerAvailable(power))
                     {
-                        GetPlayer().GetPowerData(power.name).Quantity = t;
+                        GetPlayer().GetPowerData(power.PowerId).Quantity = t;
                     }
                     else
                     {
-                        GetPlayer().AddPower(power.name, t);
+                        GetPlayer().AddPower(power.PowerId, t);
                     }
                 }));
         }
