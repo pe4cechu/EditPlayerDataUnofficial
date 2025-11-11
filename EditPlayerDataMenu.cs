@@ -172,15 +172,22 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
                         GetPlayer().SetLegendBadges(nameof(LegendsType.Rogue), false, Mathf.Min(t, feats.Count));
                         GetPlayer().SetLegendBadges(nameof(LegendsType.Rogue), true, t >= feats.Count ? 1 : 0);
                     }),
+                // csharp
                 new NumberPlayerDataSetting("Tower Gift Unlock Pops", VanillaSprites.GiftBoxIcon, 0,
-                    () => GetPlayer().Data.towerUnlockProgresses
-                        .TryGetValue(GetPlayer().Data.selectedTowerForUnlockProgression, out var val)
-                        ? val.ValueInt
-                        : 0,
+                    () =>
+                    {
+                        var player = GetPlayer();
+                        var dict = player.Data.towerUnlockProgresses;
+                        var key = player.Data.selectedTowerForUnlockProgression;
+                        if (key == null) return 0;
+                        return dict.TryGetValue(key, out var val) ? val.ValueInt : 0;
+                    },
                     t =>
                     {
-                        var dict = GetPlayer().Data.towerUnlockProgresses;
-                        var key = GetPlayer().Data.selectedTowerForUnlockProgression;
+                        var player = GetPlayer();
+                        var dict = player.Data.towerUnlockProgresses;
+                        var key = player.Data.selectedTowerForUnlockProgression;
+                        if (key == null) return; // nothing to set
                         if (dict.TryGetValue(key, out var val)) val.Value = t;
                         else dict[key] = new KonFuze_NoShuffle(t);
                     }),
@@ -233,6 +240,9 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
         },
         {
             "Online Modes", new List<PlayerDataSetting>() // uses a loop to reduce hard-coded values
+        },
+        {
+            "Achievements", new List<PlayerDataSetting>() // uses a loop to reduce hard-coded values
         }
     };
 
@@ -308,6 +318,12 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
         Settings["Instas"].Clear();
         Settings["Banners"].Clear();
         Settings["Online Modes"].Clear();
+        Settings["Achievements"].Clear();
+
+        foreach (var achievement in GameData.Instance.achievements.achievements)
+        {
+            Settings["Achievements"].Add(new AchievementPlayerDataSetting(achievement));
+        }
         
         foreach (var item in GameData.Instance.trophyStoreItems.GetAllItems())
         {
@@ -420,10 +436,16 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
                 t => data.profileBanner = t ? banner.id : GameData.Instance.profileBanners.defaultBanner.id));
         }
         
-        foreach (var artifact in GameData.Instance.artifactsData.artifactModelsByType[Il2CppType.Of<ItemArtifactModel>()])
+        foreach (var group in GameData.Instance.artifactsData.artifactModelsByType)
         {
-            Settings["Artifacts"].Add(new ArtifactPlayerDataSetting(artifact));
+            var list = group.Value;
+            foreach (var artifact in list)
+            {
+                // artifact is an ArtifactModelBase (or derived) — ArtifactPlayerDataSetting accepts it
+                Settings["Artifacts"].Add(new ArtifactPlayerDataSetting(artifact));
+            }
         }
+
 
         foreach (var boss in Enum.GetValues<BossType>())
         {
@@ -689,6 +711,19 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
                         });
                         break;
                     }
+                    case "Achievements":
+                    {
+                        AchievementPlayerDataSetting.ShowPopup(screen, false, n =>
+                        {
+                            foreach (var setting in Settings[_category].Select(s => s as AchievementPlayerDataSetting))
+                            {
+                                setting!.Setter(n);
+                            }
+                            UpdateVisibleEntries();
+                            AchievementPlayerDataSetting.ShowRestartConfirmation(screen);
+                        });
+                        break;
+                    }
                 }
             });
         })).AddText(new Info("SetAllText", 650, 200), "Set All", 60);
@@ -728,16 +763,16 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
     private void UpdateVisibleEntries()
     {
         var anyUnlockable = Settings[_category].Any(s => !s.IsUnlocked());
-        _topArea.GetDescendent<ModHelperButton>("UnlockAll")?.SetActive(anyUnlockable);
+        SafeSetActive(_topArea.GetDescendent<ModHelperButton>("UnlockAll"), anyUnlockable);
 
-        var canAddAll = _category is "Powers" or "Instas" or "Artifacts";
-        _topArea.GetDescendent<ModHelperButton>("SetAll")?.SetActive(!anyUnlockable && canAddAll);
-        
-        _topArea.GetDescendent<ModHelperPanel>("Special Button Filler")?.SetActive(!anyUnlockable && !canAddAll);
+        var canAddAll = _category is "Powers" or "Instas" or "Artifacts" or "Achievements";
+        SafeSetActive(_topArea.GetDescendent<ModHelperButton>("SetAll"), !anyUnlockable && canAddAll);
+
+        SafeSetActive(_topArea.GetDescendent<ModHelperPanel>("Special Button Filler"), !anyUnlockable && !canAddAll);
 
         var settings = Settings[_category].FindAll(s => s.Name.ContainsIgnoreCase(_searchValue));
         SetPage(_pageIdx, false);
-        
+
         for (var i = 0; i < EntriesPerPage; i++)
         {
             var idx = _pageIdx * EntriesPerPage + i;
@@ -760,6 +795,19 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
                 }
                 entry.SetActive(true);
             }
+        }
+    }
+
+    private static void SafeSetActive(ModHelperComponent? component, bool active)
+    {
+        if (component == null) return;
+        try
+        {
+            component.SetActive(active);
+        }
+        catch (Exception)
+        {
+            // Underlying Unity component may have been destroyed — ignore and continue.
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
@@ -10,6 +11,7 @@ using BTD_Mod_Helper.Extensions;
 using EditPlayerData.Utils;
 using HarmonyLib;
 using Il2CppAssets.Scripts.Data;
+using Il2CppAssets.Scripts.Data.Achievements;
 using Il2CppAssets.Scripts.Data.Knowledge.RelicKnowledge;
 using Il2CppAssets.Scripts.Data.MapSets;
 using Il2CppAssets.Scripts.Data.Store;
@@ -689,6 +691,291 @@ public class MapPlayerDataSetting(MapDetails details, MapInfo map, bool coop)
         }
     }
 }
+
+
+public class AchievementPlayerDataSetting : BoolPlayerDataSetting
+{
+    private readonly Achievement _achievement;
+
+    private static void TryResetAchievementProgress(Achievement achievement)
+    {
+        try
+        {
+            var pdata = Game.Player?.Data;
+            if (pdata == null) return;
+
+            var id = achievement.achievementId;
+            var idStr = id.ToString();
+            var name = achievement.name ?? "";
+
+            var binding = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+
+            void TryResetOnObject(object dictObj)
+            {
+                if (dictObj == null) return;
+                var dictType = dictObj.GetType();
+                if (!dictType.IsGenericType) return;
+
+                var genDef = dictType.GetGenericTypeDefinition().Name;
+                if (!genDef.Contains("Dictionary") && !genDef.Contains("IDictionary")) return;
+
+                var args = dictType.GetGenericArguments();
+                if (args.Length != 2) return;
+
+                var keyType = args[0];
+                var valueType = args[1];
+
+                var containsKey = dictType.GetMethod("ContainsKey");
+                var remove = dictType.GetMethod("Remove", new[] { keyType });
+                var indexer = dictType.GetProperty("Item");
+
+                // Try integer-keyed dictionaries first
+                if (keyType == typeof(int))
+                {
+                    if (containsKey != null && (bool)containsKey.Invoke(dictObj, new object[] { id }))
+                    {
+                        if (indexer != null && valueType == typeof(int))
+                        {
+                            indexer.SetValue(dictObj, 0, new object[] { id }); // set progress to 0
+                        }
+                        else if (remove != null)
+                        {
+                            remove.Invoke(dictObj, new object[] { id }); // remove entry if we can't set
+                        }
+                    }
+                }
+
+                // Try string-keyed dictionaries (by name or id string)
+                if (keyType == typeof(string))
+                {
+                    if (containsKey != null && (bool)containsKey.Invoke(dictObj, new object[] { name }))
+                    {
+                        if (indexer != null && valueType == typeof(int))
+                            indexer.SetValue(dictObj, 0, new object[] { name });
+                    }
+                    if (containsKey != null && (bool)containsKey.Invoke(dictObj, new object[] { idStr }))
+                    {
+                        if (indexer != null && valueType == typeof(int))
+                            indexer.SetValue(dictObj, 0, new object[] { idStr });
+                    }
+                }
+            }
+
+            var pdataType = pdata.GetType();
+
+            // Inspect fields
+            foreach (var field in pdataType.GetFields(binding))
+            {
+                var val = field.GetValue(pdata);
+                TryResetOnObject(val);
+            }
+
+            // Inspect properties
+            foreach (var prop in pdataType.GetProperties(binding))
+            {
+                if (!prop.CanRead) continue;
+                object val = null;
+                try { val = prop.GetValue(pdata); } catch { }
+                TryResetOnObject(val);
+            }
+        }
+        catch
+        {
+            // swallow any errors to avoid interfering with the game
+        }
+    }
+
+    public static void ShowRestartConfirmation(PopupScreen screen)
+    {
+        screen.ShowPopup(PopupScreen.Placement.inGameCenter, "Are you Sure?",
+            "Please restart the game to apply the effect.",
+            new Action(() =>
+            {
+                try
+                {
+                    Game.Player.SaveNow();
+                    TryStartDetachedRestart();
+                }
+                catch
+                {
+                    // swallow to avoid interfering with shutdown
+                }
+                Application.Quit();
+            }), "Restart now",
+            new Action(() => { }), "Cancel",
+            Popup.TransitionAnim.Scale, PopupScreen.BackGround.GreyNonDismissable);
+    }
+
+    protected override void ShowEditValuePopup(PopupScreen screen)
+    {
+        ShowPopup(screen, Getter(), value =>
+        {
+            Setter(value);
+            screen.ShowPopup(PopupScreen.Placement.inGameCenter, "Are you Sure?",
+                "Please restart the game to apply the effect.",
+                new Action(() =>
+                {
+                    ReloadVisuals?.Invoke();
+                    SaveThenRestart();
+                }), "Restart now",
+                new Action(() =>
+                {
+                    ReloadVisuals?.Invoke();
+                }), "Cancel",
+                Popup.TransitionAnim.Scale, PopupScreen.BackGround.GreyNonDismissable);
+        });
+    }
+
+
+    private static void SaveThenRestart()
+    {
+        try
+        {
+            TryPersistPlayerData();
+            System.Threading.Thread.Sleep(1000);
+            TryStartDetachedRestart();
+        }
+        catch
+        {
+            // swallow any errors to avoid crashing the game
+        }
+
+        Application.Quit();
+    }
+
+    private static void TryPersistPlayerData()
+    {
+        try
+        {
+            var player = Game.Player;
+            if (player != null)
+            {
+                var saveMethod = player.GetType().GetMethod("Save")
+                                 ?? player.GetType().GetMethod("SaveData")
+                                 ?? player.GetType().GetMethod("SavePlayerData");
+                saveMethod?.Invoke(player, null);
+            }
+
+            var pdata = Game.Player?.Data;
+            if (pdata != null)
+            {
+                var saveMethod2 = pdata.GetType().GetMethod("Save")
+                                  ?? pdata.GetType().GetMethod("SaveData")
+                                  ?? pdata.GetType().GetMethod("SavePlayerData");
+                saveMethod2?.Invoke(pdata, null);
+            }
+        }
+        catch
+        {
+            // ignore reflection failures, fall back to delay
+        }
+    }
+
+    private static void TryStartDetachedRestart()
+    {
+        try
+        {
+            var cmdArgs = System.Environment.GetCommandLineArgs();
+            var exePath = cmdArgs.Length > 0 ? cmdArgs[0] : System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            if (string.IsNullOrEmpty(exePath)) return;
+
+            var args = cmdArgs.Length > 1 ? string.Join(" ", cmdArgs.Skip(1).Select(a => $"\"{a}\"")) : "";
+            var startCmd = $"/C ping 127.0.0.1 -n 7 > nul && start \"\" \"{exePath}\" {args}";
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = startCmd,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                WorkingDirectory = System.IO.Path.GetDirectoryName(exePath)
+            };
+
+            System.Diagnostics.Process.Start(psi);
+        }
+        catch
+        {
+            // ignore failures to avoid interfering with shutdown
+        }
+    }
+
+    private static string GetAchievementName(string key)
+    {
+        var formatted = LocalizationManager.Instance.Format(key) ?? "";
+        var replacements = new Dictionary<string, string>
+        {
+            ["BAD"] = "Bad",
+            ["ZOMG"] = "Zomg",
+            ["BFB"] = "Bfb",
+            ["DDT"] = "Ddt"
+        };
+
+        // Match the tokens anywhere in the string (including inside other words)
+        return Regex.Replace(formatted, "(?:BAD|ZOMG|BFB|DDT)", m =>
+        {
+            return replacements.TryGetValue(m.Value, out var rep) ? rep : m.Value;
+        });
+    }
+
+
+    public AchievementPlayerDataSetting(Achievement achievement) : base(
+        LocalizationManager.Instance.Format(GetAchievementName(achievement.name)),
+        achievement.achievementIcon.GetType().GetProperty("AssetGUID") != null
+            ? (string)achievement.achievementIcon.GetType().GetProperty("AssetGUID").GetValue(achievement.achievementIcon)
+            : "",
+        false,
+        () =>
+        {
+            var set = Game.Player.Data?.achievementsClaimed;
+            return set != null && set.Contains(achievement.achievementId);
+        },
+        t =>
+        {
+            var set = Game.Player.Data?.achievementsClaimed;
+            if (set == null) return;
+            if (t)
+            {
+                if (!set.Contains(achievement.achievementId)) set.Add(achievement.achievementId);
+            }
+            else
+            {
+                set.Remove(achievement.achievementId);
+                TryResetAchievementProgress(achievement);
+            }
+        })
+    {
+        _achievement = achievement;
+    }
+
+    public override string GetId()
+    {
+        return "achievement_" + _achievement.achievementId;
+    }
+
+    public override ModHelperImage GetIcon()
+    {
+        try
+        {
+            var guidProp = _achievement.achievementIcon.GetType().GetProperty("AssetGUID");
+            if (guidProp != null)
+            {
+                var guid = guidProp.GetValue(_achievement.achievementIcon) as string;
+                if (!string.IsNullOrEmpty(guid))
+                {
+                    return ModHelperImage.Create(new Info("Icon") { X = -50, Size = 350 }, guid);
+                }
+            }
+        }
+        catch
+        {
+            // fall back to base
+        }
+
+        return base.GetIcon();
+    }
+}
+
+
 
 public class RankPlayerDataSetting(System.Func<Btd6Player> getPlayer) : PlayerDataSetting("Rank", "")
 {
