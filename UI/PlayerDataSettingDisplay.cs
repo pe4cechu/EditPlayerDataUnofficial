@@ -3,6 +3,7 @@ using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts.Unity;
+using Il2CppInterop.Runtime.Attributes;
 using Il2CppNinjaKiwi.Common;
 using Il2CppTMPro;
 using MelonLoader;
@@ -13,15 +14,18 @@ namespace EditPlayerData.UI;
 [RegisterTypeInIl2Cpp(false)]
 internal class PlayerDataSettingDisplay : ModHelperPanel
 {
-    public PlayerDataSettingDisplay(IntPtr ptr) : base(ptr) { }
+    public PlayerDataSettingDisplay(IntPtr ptr) : base(ptr)
+    {
+    }
 
     public static PlayerDataSettingDisplay Generate(string name)
     {
-        var panel = Create<PlayerDataSettingDisplay>(new Info(name, InfoPreset.Flex) {
-                Height = 300,
-                FlexWidth = 1,
-                Pivot = new Vector2(0.5f, 1)
-            }, null, RectTransform.Axis.Horizontal, 50);
+        var panel = Create<PlayerDataSettingDisplay>(new Info(name, InfoPreset.Flex)
+        {
+            Height = 300,
+            FlexWidth = 1,
+            Pivot = new Vector2(0.5f, 1)
+        }, null, RectTransform.Axis.Horizontal, 50);
 
         var mainPanel = panel.AddPanel(new Info("MainPanel", InfoPreset.Flex)
             {
@@ -44,7 +48,7 @@ internal class PlayerDataSettingDisplay : ModHelperPanel
             FlexWidth = 4
         });
         mainPanel.AddPanel(new Info("Spacing", 100));
-        
+
         panel.AddPanel(new Info("Edit", 225));
         panel.AddButton(new Info("Reset", 225), VanillaSprites.RedBtn, null)
             .AddImage(new Info("ResetIcon", 175), VanillaSprites.RestartIcon);
@@ -59,13 +63,11 @@ internal class PlayerDataSettingDisplay : ModHelperPanel
         panel.Add(contents);
     }
 
+    [HideFromIl2Cpp]
     public void SetSetting(PlayerDataSetting setting)
     {
-        setting.ReloadVisuals = () =>
-        {
-            SetSetting(setting);
-        };
-        
+        setting.ReloadVisuals = () => { SetSetting(setting); };
+
         GetDescendent<ModHelperText>("Title").SetText(setting.Name);
         SetPanelContents("IconPanel", setting.GetIcon());
         SetPanelContents("Value", setting.GetValueDisplay());

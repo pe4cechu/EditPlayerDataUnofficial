@@ -10,8 +10,10 @@ public class ModHelperTableRow : ModHelperPanel
 {
     public int Row { get; private set; }
 
-    public ModHelperTableRow(IntPtr ptr) : base(ptr) { }
-    
+    public ModHelperTableRow(IntPtr ptr) : base(ptr)
+    {
+    }
+
     public static ModHelperTableRow Create(
         int rowIdx,
         Info info,

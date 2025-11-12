@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Extensions;
 using Il2CppNinjaKiwi.Common;
-using Il2CppTMPro;
+using Il2CppInterop.Runtime.Attributes;
 using MelonLoader;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,9 +23,12 @@ public class ModHelperTable : ModHelperPanel
 
     public int RowCount => _rows.Count;
 
-    public ModHelperTable(IntPtr ptr) : base(ptr) { }
+    public ModHelperTable(IntPtr ptr) : base(ptr)
+    {
+    }
 
-    public static ModHelperTable Create(Info info, int columnCount, string? backgroundSprite = null, float colSpacing = 0.0f,
+    public static ModHelperTable Create(Info info, int columnCount, string? backgroundSprite = null,
+        float colSpacing = 0.0f,
         int[]? colFlex = null, float rowSpacing = 0.0f, float rowHeight = 0.0f, RectOffset? padding = null)
     {
         var table = Create<ModHelperTable>(info, backgroundSprite, RectTransform.Axis.Vertical,
@@ -43,7 +45,7 @@ public class ModHelperTable : ModHelperPanel
             RectTransform.Axis.Vertical, null, rowSpacing);
         table._content.AddComponent<Image>().color = Color.black;
         table._content.Mask.showMaskGraphic = false;
-        
+
         // don't know if this always happens, but at least in the MapPlayerDataSetting usecase, it has a weird visible section above the main
         // part, so this just hides anything that shouldn't exist
         table._content.ScrollRect.onValueChanged.AddListener(new Action<Vector2>(_ =>
@@ -67,35 +69,31 @@ public class ModHelperTable : ModHelperPanel
                 var inputBottom = inputPos.y - inputRect.bottom;
 
                 for (var i = 0; i < child.childCount; i++)
-                {
                     child.GetChild(i).gameObject.SetActive(
                         (inputBottom < viewportTop && inputBottom > viewportBottom) ||
                         (inputTop < viewportTop && inputTop > viewportBottom));
-                }
             }
         }));
 
 
         return table;
     }
-    
+
     public void AddRow()
     {
-        var row = ModHelperTableRow.Create(RowCount, new Info($"Row{_rows.Count+1}")
-            {
-                Height = _rowHeight, Width = _rowWidth,
-                Flex = _rowHeight == 0 ? 1 : 0
-            }, null, RectTransform.Axis.Horizontal, _rowSpacing);
-        _content!.AddScrollContent(row);
-        
-        for (var i = 0; i < _columns; i++)
+        var row = ModHelperTableRow.Create(RowCount, new Info($"Row{_rows.Count + 1}")
         {
+            Height = _rowHeight, Width = _rowWidth,
+            Flex = _rowHeight == 0? 1 : 0
+        }, null, RectTransform.Axis.Horizontal, _rowSpacing);
+        _content!.AddScrollContent(row);
+
+        for (var i = 0; i < _columns; i++)
             row.Add(Create(new Info($"Col{i + 1}", InfoPreset.Flex)
             {
                 FlexWidth = i > _colFlex.Length ? 1 : _colFlex[i]
             }));
-        }
-        
+
         _rows.Add(row);
     }
 
@@ -106,20 +104,17 @@ public class ModHelperTable : ModHelperPanel
         {
             value.SetActive(false);
             value.SetActive(true);
-
         }
 
         if (c > _columns) SetNumColumns(c);
-        for (var i = _rows.Count-1; i < r; i++) AddRow();
-        
+        for (var i = _rows.Count - 1; i < r; i++) AddRow();
+
         // if no other size is given, just fill the whole cell
         var info = value.initialInfo;
         if (info.SizeDelta == Vector2.zero && info.AnchorMin == new Vector2(0.5f, 0.5f) &&
             info.AnchorMax == new Vector2(0.5f, 0.5f))
-        {
             value.SetInfo(new Info(info.Name, InfoPreset.FillParent) { X = info.X, Y = info.Y });
-        }
-        
+
         var col = _rows[r].GetDescendent<ModHelperPanel>($"Col{c + 1}");
         col.transform.DestroyAllChildren();
         col.Add(value);
@@ -136,6 +131,7 @@ public class ModHelperTable : ModHelperPanel
         return _rows[index];
     }
 
+    [HideFromIl2Cpp]
     public void SetNumColumns(int numCols, int[]? colFlex = null)
     {
         if (colFlex != null) _colFlex = colFlex;
@@ -147,19 +143,20 @@ public class ModHelperTable : ModHelperPanel
 
             if (numChildren < numCols)
             {
-                for (var i = 0; i < numChildren - numCols; i++)
+                var toAdd = numCols - numChildren;
+                for (var i = 0; i < toAdd; i++)
                 {
-                    row.AddPanel(new Info($"Col{numChildren + i + 1}", InfoPreset.Flex)
+                    var colIndex = numChildren + i; // zero-based index of the new column
+                    row.AddPanel(new Info($"Col{colIndex + 1}", InfoPreset.Flex)
                     {
-                        FlexWidth = i > _colFlex.Length ? 1 : _colFlex[i]
+                        FlexWidth = colIndex >= _colFlex.Length ? 1 : _colFlex[colIndex]
                     });
                 }
-            } else if (numCols < numChildren)
+            }
+            else if (numCols < numChildren)
             {
-                for (var i = numChildren; i >= numCols; i++)
-                {
+                for (var i = numChildren - 1; i >= numCols; i--)
                     row.transform.GetChild(i).Destroy();
-                }
             }
         }
     }
@@ -168,9 +165,9 @@ public class ModHelperTable : ModHelperPanel
     {
         var scrollHeight = _content!.ScrollContent.RectTransform.rect.height;
         var viewportHeight = _content.ScrollRect.viewport.rect.height;
-        
+
         _content.ScrollRect.SetContentAnchoredPosition(new Vector2(0, Math.Clamp(
             Math.Abs(_rows[rowIdx].transform.localPosition.y),
-            viewportHeight/2, scrollHeight - viewportHeight/2)));
+            viewportHeight / 2, scrollHeight - viewportHeight / 2)));
     }
 }
