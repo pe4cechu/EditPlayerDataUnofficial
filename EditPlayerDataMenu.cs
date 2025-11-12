@@ -186,22 +186,15 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
                         GetPlayer().SetLegendBadges(nameof(LegendsType.Rogue), false, Mathf.Min(t, feats.Count));
                         GetPlayer().SetLegendBadges(nameof(LegendsType.Rogue), true, t >= feats.Count ? 1 : 0);
                     }),
-                // csharp
                 new NumberPlayerDataSetting("Tower Gift Unlock Pops", VanillaSprites.GiftBoxIcon, 0,
-                    () =>
-                    {
-                        var player = GetPlayer();
-                        var dict = player.Data.towerUnlockProgresses;
-                        var key = player.Data.selectedTowerForUnlockProgression;
-                        if (key == null) return 0;
-                        return dict.TryGetValue(key, out var val) ? val.ValueInt : 0;
-                    },
+                    () => GetPlayer().Data.towerUnlockProgresses
+                        .TryGetValue(GetPlayer().Data.selectedTowerForUnlockProgression, out var val)
+                        ? val.ValueInt
+                        : 0,
                     t =>
                     {
-                        var player = GetPlayer();
-                        var dict = player.Data.towerUnlockProgresses;
-                        var key = player.Data.selectedTowerForUnlockProgression;
-                        if (key == null) return; // nothing to set
+                        var dict = GetPlayer().Data.towerUnlockProgresses;
+                        var key = GetPlayer().Data.selectedTowerForUnlockProgression;
                         if (dict.TryGetValue(key, out var val)) val.Value = t;
                         else dict[key] = new KonFuze_NoShuffle(t);
                     }),

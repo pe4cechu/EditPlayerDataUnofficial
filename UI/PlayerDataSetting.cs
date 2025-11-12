@@ -697,94 +697,6 @@ public class AchievementPlayerDataSetting : BoolPlayerDataSetting
 {
     private readonly Achievement _achievement;
 
-    private static void TryResetAchievementProgress(Achievement achievement)
-    {
-        try
-        {
-            var pdata = Game.Player?.Data;
-            if (pdata == null) return;
-
-            var id = achievement.achievementId;
-            var idStr = id.ToString();
-            var name = achievement.name ?? "";
-
-            var binding = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
-
-            void TryResetOnObject(object dictObj)
-            {
-                if (dictObj == null) return;
-                var dictType = dictObj.GetType();
-                if (!dictType.IsGenericType) return;
-
-                var genDef = dictType.GetGenericTypeDefinition().Name;
-                if (!genDef.Contains("Dictionary") && !genDef.Contains("IDictionary")) return;
-
-                var args = dictType.GetGenericArguments();
-                if (args.Length != 2) return;
-
-                var keyType = args[0];
-                var valueType = args[1];
-
-                var containsKey = dictType.GetMethod("ContainsKey");
-                var remove = dictType.GetMethod("Remove", new[] { keyType });
-                var indexer = dictType.GetProperty("Item");
-
-                // Try integer-keyed dictionaries first
-                if (keyType == typeof(int))
-                {
-                    if (containsKey != null && (bool)containsKey.Invoke(dictObj, new object[] { id }))
-                    {
-                        if (indexer != null && valueType == typeof(int))
-                        {
-                            indexer.SetValue(dictObj, 0, new object[] { id }); // set progress to 0
-                        }
-                        else if (remove != null)
-                        {
-                            remove.Invoke(dictObj, new object[] { id }); // remove entry if we can't set
-                        }
-                    }
-                }
-
-                // Try string-keyed dictionaries (by name or id string)
-                if (keyType == typeof(string))
-                {
-                    if (containsKey != null && (bool)containsKey.Invoke(dictObj, new object[] { name }))
-                    {
-                        if (indexer != null && valueType == typeof(int))
-                            indexer.SetValue(dictObj, 0, new object[] { name });
-                    }
-                    if (containsKey != null && (bool)containsKey.Invoke(dictObj, new object[] { idStr }))
-                    {
-                        if (indexer != null && valueType == typeof(int))
-                            indexer.SetValue(dictObj, 0, new object[] { idStr });
-                    }
-                }
-            }
-
-            var pdataType = pdata.GetType();
-
-            // Inspect fields
-            foreach (var field in pdataType.GetFields(binding))
-            {
-                var val = field.GetValue(pdata);
-                TryResetOnObject(val);
-            }
-
-            // Inspect properties
-            foreach (var prop in pdataType.GetProperties(binding))
-            {
-                if (!prop.CanRead) continue;
-                object val = null;
-                try { val = prop.GetValue(pdata); } catch { }
-                TryResetOnObject(val);
-            }
-        }
-        catch
-        {
-            // swallow any errors to avoid interfering with the game
-        }
-    }
-
     public static void ShowRestartConfirmation(PopupScreen screen)
     {
         screen.ShowPopup(PopupScreen.Placement.inGameCenter, "Are you Sure?",
@@ -940,7 +852,6 @@ public class AchievementPlayerDataSetting : BoolPlayerDataSetting
             else
             {
                 set.Remove(achievement.achievementId);
-                TryResetAchievementProgress(achievement);
             }
         })
     {
