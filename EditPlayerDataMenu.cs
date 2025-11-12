@@ -48,35 +48,49 @@ public class EditPlayerDataMenu : ModGameMenu<ContentBrowser>
         {
             "General", new List<PlayerDataSetting>
             {
-                new BoolPlayerDataSetting(
+                new PurchasePlayerDataSetting(
                     "Unlocked Obyn Skeletor",
                     VanillaSprites.HeroIconObynSkeletor,
-                    false,
-                    () => GetPlayer().Data.unlockedTowerSkins != null &&
-                          GetPlayer().Data.unlockedTowerSkins.Contains("ObynSkeletor"),
+                    "btd6_skeletorpremiumpack",
+                    () => GetPlayer().Data.unlockedTowerSkins.Contains("ObynSkeletor"),
                     t =>
                     {
                         var data = GetPlayer().Data;
                         var skins = data.unlockedTowerSkins ??= new Il2CppSystem.Collections.Generic.HashSet<string>();
-                        if (t) skins.Add("ObynSkeletor");
-                        else skins.Remove("ObynSkeletor");
-                    }),
-                new BoolPlayerDataSetting("Unlocked Adora She-Ra", VanillaSprites.HeroIconAdoraSheRa, false,
-                    () => GetPlayer().Data.unlockedTowerSkins != null &&
-                          GetPlayer().Data.unlockedTowerSkins.Contains("AdoraSheRa"),
+                        if (t)
+                        {
+                            skins.Add("ObynSkeletor");
+                            data.purchase?.AddOneTimePurchaseItem("btd6_skeletorpremiumpack");
+                        }
+                        else
+                        {
+                            skins.Remove("ObynSkeletor");
+                            data.purchase?.RemoveOneTimePurchaseItem("btd6_skeletorpremiumpack");
+                        }
+                    }
+                ),
+                new PurchasePlayerDataSetting("Unlocked Adora She-Ra", VanillaSprites.HeroIconAdoraSheRa, "btd6_sherapremiumpack",
+                    () => GetPlayer().Data.unlockedTowerSkins.Contains("AdoraSheRa"),
                     t =>
                     {
                         var data = GetPlayer().Data;
                         var skins = data.unlockedTowerSkins ??= new Il2CppSystem.Collections.Generic.HashSet<string>();
-                        if (t) skins.Add("AdoraSheRa");
-                        else skins.Remove("AdoraSheRa");
+                        if (t)
+                        {
+                            skins.Add("AdoraSheRa");
+                            data.purchase?.AddOneTimePurchaseItem("btd6_sherapremiumpack");
+                        }
+                        else
+                        {
+                            skins.Remove("AdoraSheRa");
+                            data.purchase?.RemoveOneTimePurchaseItem("btd6_sherapremiumpack");
+                        }
                     }),
                 new BoolPlayerDataSetting(
                     "Unlocked Red Sauda",
                     VanillaSprites.HeroIconSaudaRed2,
                     false,
-                    () => GetPlayer().Data.unlockedTowerSkins != null &&
-                          GetPlayer().Data.unlockedTowerSkins.Contains("RedSauda"),
+                    () => GetPlayer().Data.unlockedTowerSkins.Contains("RedSauda"),
                     t =>
                     {
                         var data = GetPlayer().Data;
